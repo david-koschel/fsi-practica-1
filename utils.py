@@ -1,3 +1,4 @@
+import math
 
 #______________________________________________________________________________
 # Simple Data Structures: infinity, Dict, Struct
@@ -517,6 +518,51 @@ class Queue:
 def Stack():
     """Return an empty list, suitable as a Last-In-First-Out Queue."""
     return []
+
+
+class OrderedPathList():
+    def __init__(self):
+        self.stack = []
+
+    def append(self, item):
+        for i in range(len(self.stack)):
+            if item.path_cost > self.stack[i].path_cost:
+                self.stack.insert(i, item)
+                return
+        self.stack.append(item)
+
+    def __len__(self):
+        return len(self.stack)
+
+    def extend(self, items):
+        for item in items:
+            self.append(item)
+
+    def pop(self):
+        return self.stack.pop()
+
+
+class OrderedSubestimationList():
+    def __init__(self, problem):
+        self.stack = []
+        self.problem = problem
+
+    def append(self, item):
+        for i, node in enumerate(self.stack):
+            if item.path_cost + self.problem.h(item) > node.path_cost + self.problem.h(node):
+                self.stack.insert(i, item)
+                return
+        self.stack.append(item)
+
+    def __len__(self):
+        return len(self.stack)
+
+    def extend(self, items):
+        for item in items:
+            self.append(item)
+
+    def pop(self):
+        return self.stack.pop()
 
 
 class FIFOQueue(Queue):

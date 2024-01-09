@@ -8,6 +8,7 @@ functions."""
 from utils import *
 import random
 import sys
+import timeit
 
 
 # ______________________________________________________________________________
@@ -99,13 +100,23 @@ def graph_search(problem, fringe):
     If two paths reach a state, only use the best one. [Fig. 3.18]"""
     closed = {}
     fringe.append(Node(problem.initial))
+    start = timeit.default_timer() * 10**3
+    visited = 0
+    generated = 0
     while fringe:
         node = fringe.pop()
+        visited += 1
         if problem.goal_test(node.state):
+            print("\nGenerados:", generated + 1)
+            print("Visitados:", visited)
+            print("Coste:", node.path_cost)
+            print("Tiempo:", timeit.default_timer() * 10**3 - start, "ms")
             return node
         if node.state not in closed:
             closed[node.state] = True
-            fringe.extend(node.expand(problem))
+            expansion = node.expand(problem)
+            generated += len(expansion)
+            fringe.extend(expansion)
     return None
 
 
@@ -118,6 +129,15 @@ def depth_first_graph_search(problem):
     """Search the deepest nodes in the search tree first. [p 74]"""
     return graph_search(problem, Stack())
 
+
+def branch_and_bound_graph_search(problem):
+    """Search the nodes with lowest accumulated cost in the search tree first. [p 74]"""
+    return graph_search(problem, OrderedPathList())
+
+
+def branch_and_bound_subestimation_graph_search(problem):
+    """Search the nodes with lowest accumulated cost and Euclidean distance in the search tree first. [p 74]"""
+    return graph_search(problem, OrderedSubestimationList(problem))
 
 
 # _____________________________________________________________________________
@@ -183,7 +203,7 @@ def UndirectedGraph(dict=None):
 
 
 def RandomGraph(nodes=list(range(10)), min_links=2, width=400, height=300,
-                curvature=lambda: random.uniform(1.1, 1.5)):
+                 curvature=lambda: random.uniform(1.1, 1.5)):
     """Construct a random graph, with the specified nodes, and random links.
     The nodes are laid out randomly on a (width x height) rectangle.
     Then each node is connected to the min_links nearest neighbors.
